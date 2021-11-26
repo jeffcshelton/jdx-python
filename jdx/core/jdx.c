@@ -75,13 +75,23 @@ static struct PyModuleDef jdxModule = {
 };
 
 PyMODINIT_FUNC PyInit_jdx(void) {
-	if (PyType_Ready(&DatasetType) < 0) return NULL;
+	if (PyType_Ready(&HeaderType) < 0 || PyType_Ready(&DatasetType) < 0) return NULL;
+	Py_INCREF(&HeaderType);
 	Py_INCREF(&DatasetType);
 
 	PyObject *module = PyModule_Create(&jdxModule);
 	if (module == NULL) return NULL;
 
+	if (PyModule_AddObject(module, "Header", (PyObject *) &HeaderType) < 0) {
+		Py_DECREF(&HeaderType);
+		Py_DECREF(&DatasetType);
+		Py_DECREF(module);
+
+		return NULL;
+	}
+
 	if (PyModule_AddObject(module, "Dataset", (PyObject *) &DatasetType) < 0) {
+		Py_DECREF(&HeaderType);
 		Py_DECREF(&DatasetType);
 		Py_DECREF(module);
 
