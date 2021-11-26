@@ -3,17 +3,22 @@ import os
 
 def main():
 	PROJ_DIR = os.path.dirname(os.path.abspath(__file__))
-	LIBJDX_INCLUDE_DIR = os.path.join(PROJ_DIR, "libjdx/include")
+	LIBJDX_DIR = os.path.join(PROJ_DIR, "libjdx")
+
+	os.system(f"cd {LIBJDX_DIR} && make")
 
 	jdx = Extension(
 		"jdx",
-		sources=[],
-		include_dirs=[LIBJDX_INCLUDE_DIR]
+		sources=[
+			os.path.join(PROJ_DIR, "jdx/core/jdx.c")
+		],
+		include_dirs=[os.path.join(LIBJDX_DIR, "include")],
+		extra_objects=[os.path.join(LIBJDX_DIR, "lib/libjdx.a")]
 	)
 
 	setup(
 		name="jdx",
-		version="v0.2.0",
+		version="0.2.0",
 		description="Python wrapper library for libjdx.",
 		author="Jeffrey Shelton",
 		author_email="jeffrey.shelton.dev@gmail.com",
