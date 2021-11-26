@@ -5,10 +5,24 @@
 
 typedef struct {
 	PyObject_HEAD
+} VersionObject;
+
+static PyTypeObject VersionType = {
+	PyVarObject_HEAD_INIT(NULL, 0)
+		.tp_name = "jdx.Version",
+		.tp_doc = "Version object",
+		.tp_basicsize = sizeof(VersionObject),
+		.tp_itemsize = 0,
+		.tp_flags = Py_TPFLAGS_DEFAULT,
+		.tp_new = PyType_GenericNew
+};
+
+typedef struct {
+	PyObject_HEAD
 } HeaderObject;
 
 static PyTypeObject HeaderType = {
-	PyObject_HEAD_INIT(NULL)
+	PyVarObject_HEAD_INIT(NULL, 0)
 		.tp_name = "jdx.Header",
 		.tp_doc = "Header object",
 		.tp_basicsize = sizeof(HeaderObject),
@@ -22,7 +36,7 @@ typedef struct {
 } DatasetObject;
 
 static PyTypeObject DatasetType = {
-	PyObject_HEAD_INIT(NULL)
+	PyVarObject_HEAD_INIT(NULL, 0)
 		.tp_name = "jdx.Dataset",
 		.tp_doc = "Dataset object",
 		.tp_basicsize = sizeof(DatasetObject),
@@ -76,7 +90,8 @@ static struct PyModuleDef jdxModule = {
 };
 
 PyMODINIT_FUNC PyInit_jdx(void) {
-	if (PyType_Ready(&HeaderType) < 0 || PyType_Ready(&DatasetType) < 0) return NULL;
+	if (PyType_Ready(&VersionType) < 0 || PyType_Ready(&HeaderType) < 0 || PyType_Ready(&DatasetType) < 0) return NULL;
+	Py_INCREF(&VersionType);
 	Py_INCREF(&HeaderType);
 	Py_INCREF(&DatasetType);
 
@@ -84,9 +99,11 @@ PyMODINIT_FUNC PyInit_jdx(void) {
 	if (module == NULL) return NULL;
 
 	if (
+		PyModule_AddObject(module, "Version", (PyObject *) &VersionType) < 0 ||
 		PyModule_AddObject(module, "Header", (PyObject *) &HeaderType) < 0 ||
 		PyModule_AddObject(module, "Dataset", (PyObject *) &DatasetType) < 0
 	) {
+		Py_DECREF(&VersionType);
 		Py_DECREF(&HeaderType);
 		Py_DECREF(&DatasetType);
 		Py_DECREF(module);
