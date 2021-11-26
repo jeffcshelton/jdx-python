@@ -62,6 +62,7 @@ static PyObject *read_dataset_from_path(PyObject *self, PyObject *args) {
 }
 
 static PyMethodDef jdxMethods[] = {
+	{ "read_header_from_path", read_header_from_path, METH_VARARGS, "Reads JDX Header from given path." },
 	{ "read_dataset_from_path", read_dataset_from_path, METH_VARARGS, "Reads JDX Dataset from given path." },
 	{ NULL, NULL, 0, NULL }
 };
