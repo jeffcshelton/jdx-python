@@ -82,15 +82,10 @@ PyMODINIT_FUNC PyInit_jdx(void) {
 	PyObject *module = PyModule_Create(&jdxModule);
 	if (module == NULL) return NULL;
 
-	if (PyModule_AddObject(module, "Header", (PyObject *) &HeaderType) < 0) {
-		Py_DECREF(&HeaderType);
-		Py_DECREF(&DatasetType);
-		Py_DECREF(module);
-
-		return NULL;
-	}
-
-	if (PyModule_AddObject(module, "Dataset", (PyObject *) &DatasetType) < 0) {
+	if (
+		PyModule_AddObject(module, "Header", (PyObject *) &HeaderType) < 0 ||
+		PyModule_AddObject(module, "Dataset", (PyObject *) &DatasetType) < 0
+	) {
 		Py_DECREF(&HeaderType);
 		Py_DECREF(&DatasetType);
 		Py_DECREF(module);
