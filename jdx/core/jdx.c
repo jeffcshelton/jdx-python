@@ -5,6 +5,20 @@
 
 typedef struct {
 	PyObject_HEAD
+} HeaderObject;
+
+static PyTypeObject HeaderType = {
+	PyObject_HEAD_INIT(NULL)
+		.tp_name = "jdx.Header",
+		.tp_doc = "Header object",
+		.tp_basicsize = sizeof(HeaderObject),
+		.tp_itemsize = 0,
+		.tp_flags = Py_TPFLAGS_DEFAULT,
+		.tp_new = PyType_GenericNew
+};
+
+typedef struct {
+	PyObject_HEAD
 } DatasetObject;
 
 static PyTypeObject DatasetType = {
@@ -16,6 +30,21 @@ static PyTypeObject DatasetType = {
 		.tp_flags = Py_TPFLAGS_DEFAULT,
 		.tp_new = PyType_GenericNew
 };
+
+static PyObject *read_header_from_path(PyObject *self, PyObject *args) {
+	const char *path;
+
+	if (!PyArg_ParseTuple(args, "s", &path)) {
+		return NULL;
+	}
+
+	JDXHeader header;
+	JDX_ReadHeaderFromPath(&header, path);
+	printf("Item count: %llu\n", header.item_count);
+
+	Py_INCREF(Py_None);
+	return Py_None;
+}
 
 static PyObject *read_dataset_from_path(PyObject *self, PyObject *args) {
 	const char *path;
