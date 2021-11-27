@@ -11,9 +11,6 @@ typedef struct {
 } VersionObject;
 
 static void Version_dealloc(VersionObject *self) {
-	Py_XDECREF(self->major);
-	Py_XDECREF(self->minor);
-	Py_XDECREF(self->patch);
 	Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
