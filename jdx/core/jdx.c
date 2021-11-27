@@ -65,6 +65,13 @@ static int Version_init(VersionObject *self, PyObject *args) {
 	return 0;
 }
 
+static PyMemberDef Version_members[] = {
+	{ "major", T_OBJECT_EX, offsetof(VersionObject, major), 0, "Major version number" },
+	{ "minor", T_OBJECT_EX, offsetof(VersionObject, minor), 0, "Minor version number" },
+	{ "patch", T_OBJECT_EX, offsetof(VersionObject, patch), 0, "Patch version number" },
+	{ NULL }
+};
+
 static PyTypeObject VersionType = {
 	PyVarObject_HEAD_INIT(NULL, 0)
 		.tp_name = "jdx.Version",
@@ -74,7 +81,8 @@ static PyTypeObject VersionType = {
 		.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
 		.tp_new = Version_new,
 		.tp_init = (initproc) Version_init,
-		.tp_dealloc = (destructor) Version_dealloc
+		.tp_dealloc = (destructor) Version_dealloc,
+		.tp_members = Version_members
 };
 
 typedef struct {
