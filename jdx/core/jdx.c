@@ -5,6 +5,9 @@
 
 typedef struct {
 	PyObject_HEAD
+	PyObject *major;
+	PyObject *minor;
+	PyObject *patch;
 } VersionObject;
 
 static PyTypeObject VersionType = {
