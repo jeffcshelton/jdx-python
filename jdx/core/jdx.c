@@ -20,6 +20,37 @@ static PyTypeObject VersionType = {
 		.tp_new = PyType_GenericNew
 };
 
+static int Version_init(VersionObject *self, PyObject *args) {
+	PyObject *major, *minor, *patch;
+
+	if (!PyArg_ParseTuple(args, "ooo", major, minor, patch)) {
+		return -1;
+	}
+
+	if (major) {
+		Py_XDECREF(self->major);
+		Py_INCREF(major);
+
+		self->major = major;
+	}
+
+	if (minor) {
+		Py_XDECREF(self->minor);
+		Py_INCREF(minor);
+
+		self->minor = minor;
+	}
+
+	if (patch) {
+		Py_XDECREF(self->patch);
+		Py_INCREF(patch);
+
+		self->patch = patch;
+	}
+
+	return 0;
+}
+
 typedef struct {
 	PyObject_HEAD
 } HeaderObject;
