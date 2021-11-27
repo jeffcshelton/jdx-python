@@ -4,6 +4,7 @@
 #include <structmember.h>
 #include "libjdx.h"
 
+// TODO: Consider changing 'int' type to 'uint8_t' for direct compatibility with libjdx 'JDXVersion'
 typedef struct {
 	PyObject_HEAD
 	int major, minor, patch;
@@ -58,6 +59,10 @@ static PyTypeObject VersionType = {
 
 typedef struct {
 	PyObject_HEAD
+	VersionObject *version;
+
+	int image_width, image_height, bit_depth;
+	long long item_count, compressed_size;
 } HeaderObject;
 
 static PyTypeObject HeaderType = {
