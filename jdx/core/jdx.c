@@ -20,6 +20,13 @@ static PyTypeObject VersionType = {
 		.tp_new = PyType_GenericNew
 };
 
+static void Version_dealloc(VersionObject *self) {
+	Py_XDECREF(self->major);
+	Py_XDECREF(self->minor);
+	Py_XDECREF(self->patch);
+	Py_TYPE(self)->tp_free((PyObject *) self);
+}
+
 static int Version_init(VersionObject *self, PyObject *args) {
 	PyObject *major, *minor, *patch;
 
