@@ -10,21 +10,28 @@ typedef struct {
 	PyObject *patch;
 } VersionObject;
 
-static PyTypeObject VersionType = {
-	PyVarObject_HEAD_INIT(NULL, 0)
-		.tp_name = "jdx.Version",
-		.tp_doc = "Version object",
-		.tp_basicsize = sizeof(VersionObject),
-		.tp_itemsize = 0,
-		.tp_flags = Py_TPFLAGS_DEFAULT,
-		.tp_new = PyType_GenericNew
-};
-
 static void Version_dealloc(VersionObject *self) {
 	Py_XDECREF(self->major);
 	Py_XDECREF(self->minor);
 	Py_XDECREF(self->patch);
 	Py_TYPE(self)->tp_free((PyObject *) self);
+}
+
+static PyObject *Version_new(PyTypeObject *type, PyObject *args) {
+	VersionObject *self = type->tp_alloc(type, 0);
+
+	if (self) {
+		self->major = PyLong_FromLong(-1L);
+		self->minor = PyLong_FromLong(-1L);
+		self->patch = PyLong_FromLong(-1L);
+
+		if (!self->major || !self->minor || !self->patch) {
+			Py_DECREF(self);
+			return NULL;
+		}
+	}
+
+	return (PyObject *) self;
 }
 
 static int Version_init(VersionObject *self, PyObject *args) {
@@ -57,6 +64,16 @@ static int Version_init(VersionObject *self, PyObject *args) {
 
 	return 0;
 }
+
+static PyTypeObject VersionType = {
+	PyVarObject_HEAD_INIT(NULL, 0)
+		.tp_name = "jdx.Version",
+		.tp_doc = "Version object",
+		.tp_basicsize = sizeof(VersionObject),
+		.tp_itemsize = 0,
+		.tp_flags = Py_TPFLAGS_DEFAULT,
+		.tp_new = PyType_GenericNew
+};
 
 typedef struct {
 	PyObject_HEAD
