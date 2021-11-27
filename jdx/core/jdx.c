@@ -71,8 +71,10 @@ static PyTypeObject VersionType = {
 		.tp_doc = "Version object",
 		.tp_basicsize = sizeof(VersionObject),
 		.tp_itemsize = 0,
-		.tp_flags = Py_TPFLAGS_DEFAULT,
-		.tp_new = PyType_GenericNew
+		.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
+		.tp_new = Version_new,
+		.tp_init = (initproc) Version_init,
+		.tp_dealloc = (destructor) Version_dealloc
 };
 
 typedef struct {
