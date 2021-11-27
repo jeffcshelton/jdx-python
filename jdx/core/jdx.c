@@ -1,13 +1,12 @@
 #define PY_SSIZE_T_CLEAN
 
 #include <Python.h>
+#include <structmember.h>
 #include "libjdx.h"
 
 typedef struct {
 	PyObject_HEAD
-	PyObject *major;
-	PyObject *minor;
-	PyObject *patch;
+	int major, minor, patch;
 } VersionObject;
 
 static void Version_dealloc(VersionObject *self) {
@@ -21,54 +20,26 @@ static PyObject *Version_new(PyTypeObject *type, PyObject *args) {
 	VersionObject *self = type->tp_alloc(type, 0);
 
 	if (self) {
-		self->major = PyLong_FromLong(-1L);
-		self->minor = PyLong_FromLong(-1L);
-		self->patch = PyLong_FromLong(-1L);
-
-		if (!self->major || !self->minor || !self->patch) {
-			Py_DECREF(self);
-			return NULL;
-		}
+		self->major = -1;
+		self->minor = -1;
+		self->patch = -1;
 	}
 
 	return (PyObject *) self;
 }
 
 static int Version_init(VersionObject *self, PyObject *args) {
-	PyObject *major, *minor, *patch;
-
-	if (!PyArg_ParseTuple(args, "ooo", major, minor, patch)) {
+	if (!PyArg_ParseTuple(args, "iii", &self->major, &self->minor, &self->patch)) {
 		return -1;
-	}
-
-	if (major) {
-		Py_XDECREF(self->major);
-		Py_INCREF(major);
-
-		self->major = major;
-	}
-
-	if (minor) {
-		Py_XDECREF(self->minor);
-		Py_INCREF(minor);
-
-		self->minor = minor;
-	}
-
-	if (patch) {
-		Py_XDECREF(self->patch);
-		Py_INCREF(patch);
-
-		self->patch = patch;
 	}
 
 	return 0;
 }
 
 static PyMemberDef Version_members[] = {
-	{ "major", T_OBJECT_EX, offsetof(VersionObject, major), 0, "Major version number" },
-	{ "minor", T_OBJECT_EX, offsetof(VersionObject, minor), 0, "Minor version number" },
-	{ "patch", T_OBJECT_EX, offsetof(VersionObject, patch), 0, "Patch version number" },
+	{ "major", T_INT, offsetof(VersionObject, major), 0, "Major version number" },
+	{ "minor", T_INT, offsetof(VersionObject, minor), 0, "Minor version number" },
+	{ "patch", T_INT, offsetof(VersionObject, patch), 0, "Patch version number" },
 	{ NULL }
 };
 
