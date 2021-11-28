@@ -146,39 +146,7 @@ static PyTypeObject DatasetType = {
 		.tp_members = Dataset_members
 };
 
-static PyObject *read_header_from_path(PyObject *self, PyObject *args) {
-	const char *path;
-
-	if (!PyArg_ParseTuple(args, "s", &path)) {
-		return NULL;
-	}
-
-	JDXHeader header;
-	JDX_ReadHeaderFromPath(&header, path);
-	printf("Item count: %llu\n", header.item_count);
-
-	Py_INCREF(Py_None);
-	return Py_None;
-}
-
-static PyObject *read_dataset_from_path(PyObject *self, PyObject *args) {
-	const char *path;
-
-	if (!PyArg_ParseTuple(args, "s", &path)) {
-		return NULL;
-	}
-
-	JDXDataset dataset;
-	JDX_ReadDatasetFromPath(&dataset, path);
-	printf("Item count: %llu\n", dataset.header.item_count);
-
-	Py_INCREF(Py_None);
-	return Py_None;
-}
-
 static PyMethodDef jdxMethods[] = {
-	{ "read_header_from_path", read_header_from_path, METH_VARARGS, "Reads JDX Header from given path." },
-	{ "read_dataset_from_path", read_dataset_from_path, METH_VARARGS, "Reads JDX Dataset from given path." },
 	{ NULL, NULL, 0, NULL }
 };
 
