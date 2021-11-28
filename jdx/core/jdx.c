@@ -57,11 +57,16 @@ static int Header__init(HeaderObject *self, PyObject *args) {
 		return -1;
 	}
 
+	if (!PyObject_TypeCheck(version, &VersionType)) {
+		PyErr_SetString(PyExc_TypeError, "First argument must be of type 'jdx.Version'.");
+		return -1;
+	}
+
 	PyObject *tmp;
 	if (version) {
-		tmp = self->version;
+		tmp = (PyObject *) self->version;
 		Py_INCREF(version);
-		self->version = version;
+		self->version = (VersionObject *) version;
 		Py_XDECREF(tmp);
 	}
 
@@ -114,12 +119,12 @@ static int Dataset__init(DatasetObject *self, PyObject *args) {
 	if (header) {
 		Py_XDECREF(self->header);
 		Py_INCREF(header);
-		self->header = header;
+		self->header = (HeaderObject *) header;
 	}
 
 	PyObject *tmp;
 	if (items) {
-		tmp = self->items;
+		tmp = (PyObject *) self->items;
 		Py_INCREF(items);
 		self->items = items;
 		Py_XDECREF(tmp);
@@ -142,7 +147,7 @@ static PyTypeObject DatasetType = {
 		.tp_itemsize = 0,
 		.tp_flags = Py_TPFLAGS_DEFAULT,
 		.tp_new = PyType_GenericNew,
-		.tp_init = Dataset__init,
+		.tp_init = (initproc) Dataset__init,
 		.tp_members = Dataset_members
 };
 
