@@ -14,18 +14,6 @@ static void Version_dealloc(VersionObject *self) {
 	Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
-static PyObject *Version_new(PyTypeObject *type, PyObject *args) {
-	VersionObject *self = type->tp_alloc(type, 0);
-
-	if (self) {
-		self->major = -1;
-		self->minor = -1;
-		self->patch = -1;
-	}
-
-	return (PyObject *) self;
-}
-
 static int Version_init(VersionObject *self, PyObject *args) {
 	if (!PyArg_ParseTuple(args, "iii", &self->major, &self->minor, &self->patch)) {
 		return -1;
@@ -48,7 +36,7 @@ static PyTypeObject VersionType = {
 		.tp_basicsize = sizeof(VersionObject),
 		.tp_itemsize = 0,
 		.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
-		.tp_new = Version_new,
+		.tp_new = PyType_GenericNew,
 		.tp_init = (initproc) Version_init,
 		.tp_dealloc = (destructor) Version_dealloc,
 		.tp_members = Version_members
