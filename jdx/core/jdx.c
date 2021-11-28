@@ -88,8 +88,7 @@ static PyObject *Header__read_from_path(PyTypeObject *type, PyObject *args) {
 		if (error) {
 			PyErr_SetString(PyExc_Exception, "Failed to read header from file.");
 			Py_DECREF(self);
-			Py_INCREF(Py_None);
-			return Py_None;
+			return NULL;
 		}
 
 		VersionObject *version = (VersionObject *) VersionType.tp_alloc(&VersionType, 0);
