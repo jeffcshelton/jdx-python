@@ -59,13 +59,13 @@ typedef struct {
 	VersionObject *version;
 
 	int image_width, image_height, bit_depth;
-	long long item_count, compressed_size;
+	long long item_count;
 } HeaderObject;
 
 static int Header_init(HeaderObject *self, PyObject *args) {
 	PyObject *version;
 
-	if (!PyArg_ParseTuple(args, "oiiiii", &version, &self->image_width, &self->image_height, &self->bit_depth, &self->item_count, &self->compressed_size)) {
+	if (!PyArg_ParseTuple(args, "oiiiii", &version, &self->image_width, &self->image_height, &self->bit_depth, &self->item_count)) {
 		return -1;
 	}
 
@@ -80,6 +80,15 @@ static int Header_init(HeaderObject *self, PyObject *args) {
 	return 0;
 }
 
+static PyMemberDef Header_members[] = {
+	{ "version", T_OBJECT_EX, offsetof(HeaderObject, version), 0, "Version object" },
+	{ "image_width", T_INT, offsetof(HeaderObject, image_width), 0, "Image width" },
+	{ "image_height", T_INT, offsetof(HeaderObject, image_height), 0, "Image height" },
+	{ "bit_depth", T_INT, offsetof(HeaderObject, bit_depth), 0, "Bit depth" },
+	{ "item_count", T_INT, offsetof(HeaderObject, item_count), 0, "Item count" },
+	{ NULL }
+};
+
 static PyTypeObject HeaderType = {
 	PyVarObject_HEAD_INIT(NULL, 0)
 		.tp_name = "jdx.Header",
@@ -87,8 +96,9 @@ static PyTypeObject HeaderType = {
 		.tp_basicsize = sizeof(HeaderObject),
 		.tp_itemsize = 0,
 		.tp_flags = Py_TPFLAGS_DEFAULT,
+		.tp_new = PyType_GenericNew,
 		.tp_init = (initproc) Header_init,
-		.tp_new = PyType_GenericNew
+		.tp_members = Header_members
 };
 
 typedef struct {
