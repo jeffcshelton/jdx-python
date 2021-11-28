@@ -135,6 +135,53 @@ static PyTypeObject HeaderType = {
 };
 
 typedef struct {
+	PyObject_HEAD;
+	PyObject *data;
+	int label;
+} ItemObject;
+
+static int Item__init(ItemObject *self, PyObject *args) {
+	PyObject *data;
+
+	if (!PyArg_ParseTuple(args, "Oi", &data, &self->label)) {
+		return -1;
+	}
+
+	if (!PyBytes_CheckExact(data)) {
+		PyErr_SetString(PyExc_TypeError, "Second argument (label) must be of type 'bytes'.");
+		return -1;
+	}
+
+	PyObject *tmp;
+	if (data) {
+		tmp = self->data;
+		Py_INCREF(data);
+		self->data = data;
+		Py_XDECREF(tmp);
+	}
+
+	return 0;
+}
+
+static PyMemberDef Item_members[] = {
+	{ "data", T_OBJECT_EX, offsetof(ItemObject, data), 0, "Item byte data" },
+	{ "label", T_INT, offsetof(ItemObject, label), 0, "Integer label" },
+	{ NULL }
+};
+
+static PyTypeObject ItemType = {
+	PyVarObject_HEAD_INIT(NULL, 0)
+		.tp_name = "jdx.Item",
+		.tp_doc = "JDX Item object",
+		.tp_basicsize = sizeof(ItemObject),
+		.tp_itemsize = 0,
+		.tp_flags = Py_TPFLAGS_DEFAULT,
+		.tp_new = PyType_GenericNew,
+		.tp_init = (initproc) Item__init,
+		.tp_members = Item_members
+};
+
+typedef struct {
 	PyObject_HEAD
 	HeaderObject *header;
 	PyObject *items;
@@ -204,9 +251,10 @@ static struct PyModuleDef jdxModule = {
 };
 
 PyMODINIT_FUNC PyInit_jdx(void) {
-	if (PyType_Ready(&VersionType) < 0 || PyType_Ready(&HeaderType) < 0 || PyType_Ready(&DatasetType) < 0) return NULL;
+	if (PyType_Ready(&VersionType) < 0 || PyType_Ready(&HeaderType) < 0 || PyType_Ready(&ItemType) < 0 || PyType_Ready(&DatasetType) < 0) return NULL;
 	Py_INCREF(&VersionType);
 	Py_INCREF(&HeaderType);
+	Py_INCREF(&ItemType);
 	Py_INCREF(&DatasetType);
 
 	PyObject *module = PyModule_Create(&jdxModule);
@@ -215,6 +263,7 @@ PyMODINIT_FUNC PyInit_jdx(void) {
 	if (
 		PyModule_AddObject(module, "Version", (PyObject *) &VersionType) < 0 ||
 		PyModule_AddObject(module, "Header", (PyObject *) &HeaderType) < 0 ||
+		PyModule_AddObject(module, "Item", (PyObject *) &ItemType) < 0 ||
 		PyModule_AddObject(module, "Dataset", (PyObject *) &DatasetType) < 0
 	) {
 		Py_DECREF(&VersionType);
