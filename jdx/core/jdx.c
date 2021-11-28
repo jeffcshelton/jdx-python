@@ -10,16 +10,16 @@ typedef struct {
 	int major, minor, patch;
 } VersionObject;
 
-static void Version_dealloc(VersionObject *self) {
-	Py_TYPE(self)->tp_free((PyObject *) self);
-}
-
-static int Version_init(VersionObject *self, PyObject *args) {
+static int Version__init(VersionObject *self, PyObject *args) {
 	if (!PyArg_ParseTuple(args, "iii", &self->major, &self->minor, &self->patch)) {
 		return -1;
 	}
 
 	return 0;
+}
+
+static PyObject *Version__str(VersionObject *self) {
+	return PyUnicode_FromFormat("v%d.%d.%d", self->major, self->minor, self->patch);
 }
 
 static PyMemberDef Version_members[] = {
@@ -37,8 +37,8 @@ static PyTypeObject VersionType = {
 		.tp_itemsize = 0,
 		.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
 		.tp_new = PyType_GenericNew,
-		.tp_init = (initproc) Version_init,
-		.tp_dealloc = (destructor) Version_dealloc,
+		.tp_init = (initproc) Version__init,
+		.tp_str = (reprfunc) Version__str,
 		.tp_members = Version_members
 };
 
