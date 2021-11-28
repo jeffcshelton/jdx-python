@@ -62,6 +62,24 @@ typedef struct {
 	long long item_count, compressed_size;
 } HeaderObject;
 
+static int Header_init(HeaderObject *self, PyObject *args) {
+	PyObject *version;
+
+	if (!PyArg_ParseTuple(args, "oiiiii", &version, &self->image_width, &self->image_height, &self->bit_depth, &self->item_count, &self->compressed_size)) {
+		return -1;
+	}
+
+	PyObject *tmp;
+	if (version) {
+		tmp = self->version;
+		Py_INCREF(version);
+		self->version = version;
+		Py_XDECREF(tmp);
+	}
+
+	return 0;
+}
+
 static PyTypeObject HeaderType = {
 	PyVarObject_HEAD_INIT(NULL, 0)
 		.tp_name = "jdx.Header",
@@ -69,6 +87,7 @@ static PyTypeObject HeaderType = {
 		.tp_basicsize = sizeof(HeaderObject),
 		.tp_itemsize = 0,
 		.tp_flags = Py_TPFLAGS_DEFAULT,
+		.tp_init = (initproc) Header_init,
 		.tp_new = PyType_GenericNew
 };
 
