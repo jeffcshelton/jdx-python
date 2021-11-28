@@ -53,7 +53,7 @@ typedef struct {
 static int Header_init(HeaderObject *self, PyObject *args) {
 	PyObject *version;
 
-	if (!PyArg_ParseTuple(args, "oiiii", &version, &self->image_width, &self->image_height, &self->bit_depth, &self->item_count)) {
+	if (!PyArg_ParseTuple(args, "Oiiii", &version, &self->image_width, &self->image_height, &self->bit_depth, &self->item_count)) {
 		return -1;
 	}
 
