@@ -50,7 +50,7 @@ typedef struct {
 	long long item_count;
 } HeaderObject;
 
-static int Header_init(HeaderObject *self, PyObject *args) {
+static int Header__init(HeaderObject *self, PyObject *args) {
 	PyObject *version;
 
 	if (!PyArg_ParseTuple(args, "Oiiii", &version, &self->image_width, &self->image_height, &self->bit_depth, &self->item_count)) {
@@ -85,13 +85,54 @@ static PyTypeObject HeaderType = {
 		.tp_itemsize = 0,
 		.tp_flags = Py_TPFLAGS_DEFAULT,
 		.tp_new = PyType_GenericNew,
-		.tp_init = (initproc) Header_init,
+		.tp_init = (initproc) Header__init,
 		.tp_members = Header_members
 };
 
 typedef struct {
 	PyObject_HEAD
+	HeaderObject *header;
+	PyObject *items;
 } DatasetObject;
+
+static int Dataset__init(DatasetObject *self, PyObject *args) {
+	PyObject *header, *items;
+	if (!PyArg_ParseTuple(args, "OO", &header, &items)) {
+		return -1;
+	}
+
+	if (!PyObject_TypeCheck(header, &HeaderType)) {
+		PyErr_SetString(PyExc_TypeError, "First argument must be of type Header.");
+		return -1;
+	}
+
+	if (!PyList_Check(items)) {
+		PyErr_SetString(PyExc_TypeError, "Second argument must be a list of Items.");
+		return -1;
+	}
+
+	if (header) {
+		Py_XDECREF(self->header);
+		Py_INCREF(header);
+		self->header = header;
+	}
+
+	PyObject *tmp;
+	if (items) {
+		tmp = self->items;
+		Py_INCREF(items);
+		self->items = items;
+		Py_XDECREF(tmp);
+	}
+
+	return 0;
+}
+
+static PyMemberDef Dataset_members[] = {
+	{ "header", T_OBJECT_EX, offsetof(DatasetObject, header), 0, "Header object" },
+	{ "items", T_OBJECT_EX, offsetof(DatasetObject, items), 0, "List of items" },
+	{ NULL }
+};
 
 static PyTypeObject DatasetType = {
 	PyVarObject_HEAD_INIT(NULL, 0)
@@ -100,7 +141,9 @@ static PyTypeObject DatasetType = {
 		.tp_basicsize = sizeof(DatasetObject),
 		.tp_itemsize = 0,
 		.tp_flags = Py_TPFLAGS_DEFAULT,
-		.tp_new = PyType_GenericNew
+		.tp_new = PyType_GenericNew,
+		.tp_init = Dataset__init,
+		.tp_members = Dataset_members
 };
 
 static PyObject *read_header_from_path(PyObject *self, PyObject *args) {
