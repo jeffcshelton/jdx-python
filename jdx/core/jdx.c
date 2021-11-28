@@ -73,12 +73,51 @@ static int Header__init(HeaderObject *self, PyObject *args) {
 	return 0;
 }
 
+static PyObject *Header__read_from_path(PyTypeObject *type, PyObject *args) {
+	const char *path;
+
+	if (!PyArg_ParseTuple(args, "s", &path)) {
+		return NULL;
+	}
+
+	HeaderObject *self = (HeaderObject *) type->tp_alloc(type, 0);
+	if (self) {
+		JDXHeader header;
+		JDXError error = JDX_ReadHeaderFromPath(&header, path);
+
+		if (error) {
+			PyErr_SetString(PyExc_Exception, "Failed to read header from file.");
+			Py_DECREF(self);
+			Py_INCREF(Py_None);
+			return Py_None;
+		}
+
+		VersionObject *version = (VersionObject *) VersionType.tp_alloc(&VersionType, 0);
+		version->major = header.version.major;
+		version->minor = header.version.minor;
+		version->patch = header.version.patch;
+
+		self->version = version;
+		self->image_width = (int) header.image_width;
+		self->image_height = (int) header.image_height;
+		self->bit_depth = (int) header.bit_depth;
+		self->item_count = (long long) header.item_count;
+	}
+
+	return (PyObject *) self;
+}
+
 static PyMemberDef Header_members[] = {
 	{ "version", T_OBJECT_EX, offsetof(HeaderObject, version), 0, "Version object" },
 	{ "image_width", T_INT, offsetof(HeaderObject, image_width), 0, "Image width" },
 	{ "image_height", T_INT, offsetof(HeaderObject, image_height), 0, "Image height" },
 	{ "bit_depth", T_INT, offsetof(HeaderObject, bit_depth), 0, "Bit depth" },
 	{ "item_count", T_INT, offsetof(HeaderObject, item_count), 0, "Item count" },
+	{ NULL }
+};
+
+static PyMethodDef Header_methods[] = {
+	{ "read_from_path", (PyCFunction) Header__read_from_path, METH_VARARGS | METH_CLASS, "Reads only the header from a JDX file." },
 	{ NULL }
 };
 
@@ -91,7 +130,8 @@ static PyTypeObject HeaderType = {
 		.tp_flags = Py_TPFLAGS_DEFAULT,
 		.tp_new = PyType_GenericNew,
 		.tp_init = (initproc) Header__init,
-		.tp_members = Header_members
+		.tp_members = Header_members,
+		.tp_methods = Header_methods
 };
 
 typedef struct {
