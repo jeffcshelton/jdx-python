@@ -26,10 +26,24 @@ static PyObject *Version__str(VersionObject *self) {
 	return PyUnicode_FromFormat("v%d.%d.%d", self->major, self->minor, self->patch);
 }
 
+static PyObject *Version__current(PyTypeObject *type, PyObject *args) {
+	VersionObject *self = (VersionObject *) type->tp_alloc(type, 0);
+	self->major = JDX_VERSION.major;
+	self->minor = JDX_VERSION.minor;
+	self->patch = JDX_VERSION.patch;
+
+	return (PyObject *) self;
+}
+
 static PyMemberDef Version_members[] = {
 	{ "major", T_INT, offsetof(VersionObject, major), 0, "Major version number" },
 	{ "minor", T_INT, offsetof(VersionObject, minor), 0, "Minor version number" },
 	{ "patch", T_INT, offsetof(VersionObject, patch), 0, "Patch version number" },
+	{ NULL }
+};
+
+static PyMethodDef Version_methods[] = {
+	{ "current", (PyCFunction) Version__current, METH_NOARGS | METH_CLASS, "Returns the current JDX version of the library." },
 	{ NULL }
 };
 
@@ -44,7 +58,8 @@ static PyTypeObject VersionType = {
 		.tp_init = (initproc) Version__init,
 		.tp_dealloc = (destructor) Version__dealloc,
 		.tp_str = (reprfunc) Version__str,
-		.tp_members = Version_members
+		.tp_members = Version_members,
+		.tp_methods = Version_methods
 };
 
 typedef struct {
