@@ -304,6 +304,7 @@ static PyObject *Dataset__read_from_path(PyTypeObject *type, PyObject *args) {
 
 		self->header = header;
 		self->items = items;
+		JDX_FreeDataset(dataset);
 	}
 
 	return (PyObject *) self;
