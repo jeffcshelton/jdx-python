@@ -78,6 +78,11 @@ static int Header__init(HeaderObject *self, PyObject *args) {
 	return 0;
 }
 
+static void Header__dealloc(HeaderObject *self) {
+	Py_XDECREF(self->version);
+	Py_TYPE(self)->tp_free(self);
+}
+
 static PyObject *Header__read_from_path(PyTypeObject *type, PyObject *args) {
 	const char *path;
 
@@ -134,6 +139,7 @@ static PyTypeObject HeaderType = {
 		.tp_flags = Py_TPFLAGS_DEFAULT,
 		.tp_new = PyType_GenericNew,
 		.tp_init = (initproc) Header__init,
+		.tp_dealloc = (destructor) Header__dealloc,
 		.tp_members = Header_members,
 		.tp_methods = Header_methods
 };
