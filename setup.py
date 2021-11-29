@@ -11,7 +11,7 @@ def main():
 	jdx = Extension(
 		"jdx",
 		sources=[
-			os.path.join(PROJ_DIR, "jdx/core/jdx.c")
+			os.path.join(PROJ_DIR, "wrapper.c")
 		],
 		include_dirs=[os.path.join(LIBJDX_DIR, "include")],
 		extra_objects=[os.path.join(LIBJDX_DIR, "lib/libjdx.a")]
