@@ -219,9 +219,67 @@ static int Dataset__init(DatasetObject *self, PyObject *args) {
 	return 0;
 }
 
+static PyObject *Dataset__read_from_path(PyTypeObject *type, PyObject *args) {
+	const char *path;
+
+	if (!PyArg_ParseTuple(args, "s", &path)) {
+		return NULL;
+	}
+
+	DatasetObject *self = (DatasetObject *) type->tp_alloc(type, 0);
+	if (self) {
+		JDXDataset dataset;
+		JDXError error = JDX_ReadDatasetFromPath(&dataset, path);
+
+		if (error) {
+			PyErr_SetString(PyExc_Exception, "Failed to read dataset from file.");
+			Py_DECREF(self);
+			return NULL;
+		}
+
+		// TODO: Simplify this greatly
+		VersionObject *version = (VersionObject *) VersionType.tp_alloc(&VersionType, 0);
+		version->major = (int) dataset.header.version.major;
+		version->minor = (int) dataset.header.version.minor;
+		version->patch = (int) dataset.header.version.patch;
+
+		HeaderObject *header = (HeaderObject *) HeaderType.tp_alloc(&HeaderType, 0);
+		header->version = version;
+		header->image_width = (int) dataset.header.image_width;
+		header->image_height = (int) dataset.header.image_height;
+		header->bit_depth = (int) dataset.header.bit_depth;
+		header->item_count = (long long) dataset.header.item_count;
+
+		size_t image_size = (
+			(size_t) dataset.header.image_width *
+			(size_t) dataset.header.image_height *
+			(size_t) dataset.header.bit_depth
+		);
+
+		PyObject *items = PyList_New(dataset.header.item_count);
+		for (uint64_t i = 0; i < dataset.header.item_count; i++) {
+			ItemObject *item = (ItemObject *) ItemType.tp_alloc(&ItemType, 0);
+			item->data = PyBytes_FromStringAndSize(dataset.items[i].data, image_size);
+			item->label = (int) dataset.items[i].label;
+
+			PyList_SetItem(items, i, item);
+		}
+
+		self->header = header;
+		self->items = items;
+	}
+
+	return (PyObject *) self;
+}
+
 static PyMemberDef Dataset_members[] = {
 	{ "header", T_OBJECT_EX, offsetof(DatasetObject, header), 0, "Header object" },
 	{ "items", T_OBJECT_EX, offsetof(DatasetObject, items), 0, "List of items" },
+	{ NULL }
+};
+
+static PyMethodDef Dataset_methods[] = {
+	{ "read_from_path", (PyCFunction) Dataset__read_from_path, METH_VARARGS | METH_CLASS, "Reads Dataset from JDX file." },
 	{ NULL }
 };
 
@@ -234,7 +292,8 @@ static PyTypeObject DatasetType = {
 		.tp_flags = Py_TPFLAGS_DEFAULT,
 		.tp_new = PyType_GenericNew,
 		.tp_init = (initproc) Dataset__init,
-		.tp_members = Dataset_members
+		.tp_members = Dataset_members,
+		.tp_methods = Dataset_methods
 };
 
 static PyMethodDef jdxMethods[] = {
