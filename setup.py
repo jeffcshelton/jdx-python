@@ -5,6 +5,7 @@ def main():
 	PROJ_DIR = os.path.dirname(os.path.abspath(__file__))
 	LIBJDX_DIR = os.path.join(PROJ_DIR, "libjdx")
 
+	os.system("git submodule update --init --recursive")
 	os.system(f"cd {LIBJDX_DIR} && make")
 
 	jdx = Extension(
