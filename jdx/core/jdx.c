@@ -281,10 +281,10 @@ static PyObject *Dataset__read_from_path(PyTypeObject *type, PyObject *args) {
 		PyObject *items = PyList_New(dataset.header.item_count);
 		for (uint64_t i = 0; i < dataset.header.item_count; i++) {
 			ItemObject *item = (ItemObject *) ItemType.tp_alloc(&ItemType, 0);
-			item->data = PyBytes_FromStringAndSize(dataset.items[i].data, image_size);
+			item->data = PyBytes_FromStringAndSize((char *) dataset.items[i].data, image_size);
 			item->label = (int) dataset.items[i].label;
 
-			PyList_SetItem(items, i, item);
+			PyList_SetItem(items, i, (PyObject *) item);
 		}
 
 		self->header = header;
