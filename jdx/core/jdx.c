@@ -18,6 +18,10 @@ static int Version__init(VersionObject *self, PyObject *args) {
 	return 0;
 }
 
+static void Version__dealloc(VersionObject *self) {
+	Py_TYPE(self)->tp_free(self);
+}
+
 static PyObject *Version__str(VersionObject *self) {
 	return PyUnicode_FromFormat("v%d.%d.%d", self->major, self->minor, self->patch);
 }
@@ -38,6 +42,7 @@ static PyTypeObject VersionType = {
 		.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
 		.tp_new = PyType_GenericNew,
 		.tp_init = (initproc) Version__init,
+		.tp_dealloc = (destructor) Version__dealloc,
 		.tp_str = (reprfunc) Version__str,
 		.tp_members = Version_members
 };
