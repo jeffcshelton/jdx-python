@@ -173,6 +173,11 @@ static int Item__init(ItemObject *self, PyObject *args) {
 	return 0;
 }
 
+static void Item__dealloc(ItemObject *self) {
+	Py_XDECREF(self->data);
+	Py_TYPE(self)->tp_free(self);
+}
+
 static PyMemberDef Item_members[] = {
 	{ "data", T_OBJECT_EX, offsetof(ItemObject, data), 0, "Item byte data" },
 	{ "label", T_INT, offsetof(ItemObject, label), 0, "Integer label" },
@@ -188,6 +193,7 @@ static PyTypeObject ItemType = {
 		.tp_flags = Py_TPFLAGS_DEFAULT,
 		.tp_new = PyType_GenericNew,
 		.tp_init = (initproc) Item__init,
+		.tp_dealloc = (destructor) Item__dealloc,
 		.tp_members = Item_members
 };
 
@@ -228,6 +234,11 @@ static int Dataset__init(DatasetObject *self, PyObject *args) {
 	}
 
 	return 0;
+}
+
+static void Dataset__dealloc(DatasetObject *self) {
+	Py_XDECREF(self->header);
+	Py_TYPE(self)->tp_free(self);
 }
 
 static PyObject *Dataset__read_from_path(PyTypeObject *type, PyObject *args) {
@@ -303,6 +314,7 @@ static PyTypeObject DatasetType = {
 		.tp_flags = Py_TPFLAGS_DEFAULT,
 		.tp_new = PyType_GenericNew,
 		.tp_init = (initproc) Dataset__init,
+		.tp_dealloc = (destructor) Dataset__dealloc,
 		.tp_members = Dataset_members,
 		.tp_methods = Dataset_methods
 };
