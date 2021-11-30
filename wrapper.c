@@ -4,46 +4,24 @@
 #include <structmember.h>
 #include "libjdx.h"
 
-// TODO: Consider changing 'int' type to 'uint8_t' for direct compatibility with libjdx 'JDXVersion'
 typedef struct {
 	PyObject_HEAD
-	int major, minor, patch;
 } VersionObject;
 
-static int Version__init(VersionObject *self, PyObject *args) {
-	if (!PyArg_ParseTuple(args, "iii", &self->major, &self->minor, &self->patch)) {
-		return -1;
-	}
+static PyObject *Version__current(void) {
+	const char *build_type_str;
 
-	return 0;
+	if (JDX_VERSION.build_type == JDXBuildType_DEV) build_type_str = " (dev build)";
+	else if (JDX_VERSION.build_type == JDXBuildType_ALPHA) build_type_str = "-alpha";
+	else if (JDX_VERSION.build_type == JDXBuildType_BETA) build_type_str = "-beta";
+	else if (JDX_VERSION.build_type == JDXBuildType_RC) build_type_str = "-rc";
+	else if (JDX_VERSION.build_type == JDXBuildType_RELEASE) build_type_str = "";
+
+	return PyUnicode_FromFormat("v%u.%u.%u%s", JDX_VERSION.major, JDX_VERSION.minor, JDX_VERSION.patch, build_type_str);
 }
-
-static void Version__dealloc(VersionObject *self) {
-	Py_TYPE(self)->tp_free(self);
-}
-
-static PyObject *Version__str(VersionObject *self) {
-	return PyUnicode_FromFormat("v%d.%d.%d", self->major, self->minor, self->patch);
-}
-
-static PyObject *Version__current(PyTypeObject *type, PyObject *args) {
-	VersionObject *self = (VersionObject *) type->tp_alloc(type, 0);
-	self->major = JDX_VERSION.major;
-	self->minor = JDX_VERSION.minor;
-	self->patch = JDX_VERSION.patch;
-
-	return (PyObject *) self;
-}
-
-static PyMemberDef Version_members[] = {
-	{ "major", T_INT, offsetof(VersionObject, major), 0, "Major version number" },
-	{ "minor", T_INT, offsetof(VersionObject, minor), 0, "Minor version number" },
-	{ "patch", T_INT, offsetof(VersionObject, patch), 0, "Patch version number" },
-	{ NULL }
-};
 
 static PyMethodDef Version_methods[] = {
-	{ "current", (PyCFunction) Version__current, METH_NOARGS | METH_CLASS, "Returns the current JDX version of the library." },
+	{ "current", (PyCFunction) Version__current, METH_NOARGS | METH_STATIC, "Returns the current JDX version of the library." },
 	{ NULL }
 };
 
@@ -54,47 +32,24 @@ static PyTypeObject VersionType = {
 		.tp_basicsize = sizeof(VersionObject),
 		.tp_itemsize = 0,
 		.tp_flags = Py_TPFLAGS_DEFAULT,
-		.tp_new = PyType_GenericNew,
-		.tp_init = (initproc) Version__init,
-		.tp_dealloc = (destructor) Version__dealloc,
-		.tp_str = (reprfunc) Version__str,
-		.tp_members = Version_members,
 		.tp_methods = Version_methods
 };
 
 typedef struct {
 	PyObject_HEAD
-	VersionObject *version;
-
 	int image_width, image_height, bit_depth;
 	long long item_count;
 } HeaderObject;
 
 static int Header__init(HeaderObject *self, PyObject *args) {
-	PyObject *version;
-
-	if (!PyArg_ParseTuple(args, "Oiiii", &version, &self->image_width, &self->image_height, &self->bit_depth, &self->item_count)) {
+	if (!PyArg_ParseTuple(args, "Oiiii", &self->image_width, &self->image_height, &self->bit_depth, &self->item_count)) {
 		return -1;
-	}
-
-	if (!PyObject_TypeCheck(version, &VersionType)) {
-		PyErr_SetString(PyExc_TypeError, "First argument must be of type 'jdx.Version'.");
-		return -1;
-	}
-
-	PyObject *tmp;
-	if (version) {
-		tmp = (PyObject *) self->version;
-		Py_INCREF(version);
-		self->version = (VersionObject *) version;
-		Py_XDECREF(tmp);
 	}
 
 	return 0;
 }
 
 static void Header__dealloc(HeaderObject *self) {
-	Py_XDECREF(self->version);
 	Py_TYPE(self)->tp_free(self);
 }
 
@@ -116,12 +71,6 @@ static PyObject *Header__read_from_path(PyTypeObject *type, PyObject *args) {
 			return NULL;
 		}
 
-		VersionObject *version = (VersionObject *) VersionType.tp_alloc(&VersionType, 0);
-		version->major = header.version.major;
-		version->minor = header.version.minor;
-		version->patch = header.version.patch;
-
-		self->version = version;
 		self->image_width = (int) header.image_width;
 		self->image_height = (int) header.image_height;
 		self->bit_depth = (int) header.bit_depth;
@@ -132,7 +81,6 @@ static PyObject *Header__read_from_path(PyTypeObject *type, PyObject *args) {
 }
 
 static PyMemberDef Header_members[] = {
-	{ "version", T_OBJECT_EX, offsetof(HeaderObject, version), 0, "Version object" },
 	{ "image_width", T_INT, offsetof(HeaderObject, image_width), 0, "Image width" },
 	{ "image_height", T_INT, offsetof(HeaderObject, image_height), 0, "Image height" },
 	{ "bit_depth", T_INT, offsetof(HeaderObject, bit_depth), 0, "Bit depth" },
@@ -274,14 +222,7 @@ static PyObject *Dataset__read_from_path(PyTypeObject *type, PyObject *args) {
 			return NULL;
 		}
 
-		// TODO: Simplify this greatly
-		VersionObject *version = (VersionObject *) VersionType.tp_alloc(&VersionType, 0);
-		version->major = (int) dataset.header.version.major;
-		version->minor = (int) dataset.header.version.minor;
-		version->patch = (int) dataset.header.version.patch;
-
 		HeaderObject *header = (HeaderObject *) HeaderType.tp_alloc(&HeaderType, 0);
-		header->version = version;
 		header->image_width = (int) dataset.header.image_width;
 		header->image_height = (int) dataset.header.image_height;
 		header->bit_depth = (int) dataset.header.bit_depth;
@@ -336,7 +277,7 @@ static PyTypeObject DatasetType = {
 };
 
 static PyMethodDef jdxMethods[] = {
-	{ NULL, NULL, 0, NULL }
+	{ NULL }
 };
 
 static struct PyModuleDef jdxModule = {
