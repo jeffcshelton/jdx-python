@@ -19,9 +19,9 @@ def main():
 
 	setup(
 		name="jdx",
-		version="0.2.0",
+		version="0.3.0-alpha",
 		description="Python wrapper library for libjdx.",
-		author="Jeffrey Shelton",
+		author="Jeffrey C. Shelton",
 		author_email="jeffrey.shelton.dev@gmail.com",
 		url="https://github.com/jeffreycshelton/jdx-python",
 		license="MIT",
