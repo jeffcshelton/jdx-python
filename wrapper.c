@@ -6,37 +6,6 @@
 
 typedef struct {
 	PyObject_HEAD
-} VersionObject;
-
-static PyObject *Version__current(void) {
-	const char *build_type_str;
-
-	if (JDX_VERSION.build_type == JDXBuildType_DEV) build_type_str = " (dev build)";
-	else if (JDX_VERSION.build_type == JDXBuildType_ALPHA) build_type_str = "-alpha";
-	else if (JDX_VERSION.build_type == JDXBuildType_BETA) build_type_str = "-beta";
-	else if (JDX_VERSION.build_type == JDXBuildType_RC) build_type_str = "-rc";
-	else if (JDX_VERSION.build_type == JDXBuildType_RELEASE) build_type_str = "";
-
-	return PyUnicode_FromFormat("v%u.%u.%u%s", JDX_VERSION.major, JDX_VERSION.minor, JDX_VERSION.patch, build_type_str);
-}
-
-static PyMethodDef Version_methods[] = {
-	{ "current", (PyCFunction) Version__current, METH_NOARGS | METH_STATIC, "Returns the current JDX version of the library." },
-	{ NULL }
-};
-
-static PyTypeObject VersionType = {
-	PyVarObject_HEAD_INIT(NULL, 0)
-		.tp_name = "jdx.Version",
-		.tp_doc = "Version object",
-		.tp_basicsize = sizeof(VersionObject),
-		.tp_itemsize = 0,
-		.tp_flags = Py_TPFLAGS_DEFAULT,
-		.tp_methods = Version_methods
-};
-
-typedef struct {
-	PyObject_HEAD
 	int image_width, image_height, bit_depth;
 	long long item_count;
 } HeaderObject;
@@ -276,7 +245,20 @@ static PyTypeObject DatasetType = {
 		.tp_methods = Dataset_methods
 };
 
-static PyMethodDef jdxMethods[] = {
+static PyObject *jdx__version(void) {
+	const char *build_type_str;
+
+	if (JDX_VERSION.build_type == JDXBuildType_DEV) build_type_str = " (dev build)";
+	else if (JDX_VERSION.build_type == JDXBuildType_ALPHA) build_type_str = "-alpha";
+	else if (JDX_VERSION.build_type == JDXBuildType_BETA) build_type_str = "-beta";
+	else if (JDX_VERSION.build_type == JDXBuildType_RC) build_type_str = "-rc";
+	else if (JDX_VERSION.build_type == JDXBuildType_RELEASE) build_type_str = "";
+
+	return PyUnicode_FromFormat("v%u.%u.%u%s", JDX_VERSION.major, JDX_VERSION.minor, JDX_VERSION.patch, build_type_str);
+}
+
+static PyMethodDef jdx_methods[] = {
+	{ "version", (PyCFunction) jdx__version, METH_NOARGS, "Returns the current JDX version of the library." },
 	{ NULL }
 };
 
@@ -285,12 +267,11 @@ static struct PyModuleDef jdxModule = {
 	"jdx",
 	"Python wrapper for libjdx.",
 	-1,
-	jdxMethods
+	jdx_methods
 };
 
 PyMODINIT_FUNC PyInit_jdx(void) {
-	if (PyType_Ready(&VersionType) < 0 || PyType_Ready(&HeaderType) < 0 || PyType_Ready(&ItemType) < 0 || PyType_Ready(&DatasetType) < 0) return NULL;
-	Py_INCREF(&VersionType);
+	if (PyType_Ready(&HeaderType) < 0 || PyType_Ready(&ItemType) < 0 || PyType_Ready(&DatasetType) < 0) return NULL;
 	Py_INCREF(&HeaderType);
 	Py_INCREF(&ItemType);
 	Py_INCREF(&DatasetType);
@@ -299,12 +280,10 @@ PyMODINIT_FUNC PyInit_jdx(void) {
 	if (module == NULL) return NULL;
 
 	if (
-		PyModule_AddObject(module, "Version", (PyObject *) &VersionType) < 0 ||
 		PyModule_AddObject(module, "Header", (PyObject *) &HeaderType) < 0 ||
 		PyModule_AddObject(module, "Item", (PyObject *) &ItemType) < 0 ||
 		PyModule_AddObject(module, "Dataset", (PyObject *) &DatasetType) < 0
 	) {
-		Py_DECREF(&VersionType);
 		Py_DECREF(&HeaderType);
 		Py_DECREF(&DatasetType);
 		Py_DECREF(module);
