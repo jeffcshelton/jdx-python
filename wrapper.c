@@ -285,6 +285,7 @@ PyMODINIT_FUNC PyInit_jdx(void) {
 		PyModule_AddObject(module, "Dataset", (PyObject *) &DatasetType) < 0
 	) {
 		Py_DECREF(&HeaderType);
+		Py_DECREF(&ItemType);
 		Py_DECREF(&DatasetType);
 		Py_DECREF(module);
 
