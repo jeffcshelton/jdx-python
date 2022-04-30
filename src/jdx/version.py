@@ -1,4 +1,5 @@
 from __future__ import annotations
+from io import BufferedReader
 from enum import Enum
 
 class BuildType(Enum):
@@ -15,3 +16,11 @@ class Version:
 		self.patch = patch
 		self.build_type = build_type
 
+	@staticmethod
+	def read_from_file(file: BufferedReader) -> Version:
+		return Version(
+			int.from_bytes(file.read(1), "little"),
+			int.from_bytes(file.read(1), "little"),
+			int.from_bytes(file.read(1), "little"),
+			BuildType(int.from_bytes(file.read(1), "little"))
+		)
