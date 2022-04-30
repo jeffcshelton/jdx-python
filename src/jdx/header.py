@@ -37,3 +37,18 @@ class Header:
 		))
 
 		return Header(version, image_width, image_height, bit_depth, image_count, labels)
+
+	def write_to_file(self, file: BufferedReader):
+		file.write(b"JDX")
+		self.version.write_to_file(file)
+
+		file.write(self.image_width.to_bytes(2, "little"))
+		file.write(self.image_height.to_bytes(2, "little"))
+		file.write(self.bit_depth.to_bytes(1, "little"))
+
+		raw_labels = b"".join([label.encode("utf-8") + b"\0" for label in self.labels])
+		
+		file.write(len(raw_labels).to_bytes(4, "little"))
+		file.write(self.image_count.to_bytes(8, "little"))
+		file.write(raw_labels)
+		file.flush()

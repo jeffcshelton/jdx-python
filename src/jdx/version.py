@@ -1,8 +1,8 @@
 from __future__ import annotations
 from io import BufferedReader
-from enum import Enum
+from enum import IntEnum
 
-class BuildType(Enum):
+class BuildType(IntEnum):
 	DEV = 0
 	ALPHA = 1
 	BETA = 2
@@ -24,3 +24,9 @@ class Version:
 			int.from_bytes(file.read(1), "little"),
 			BuildType(int.from_bytes(file.read(1), "little"))
 		)
+
+	def write_to_file(self, file: BufferedReader):
+		file.write(self.major.to_bytes(1, "little"))
+		file.write(self.minor.to_bytes(1, "little"))
+		file.write(self.patch.to_bytes(1, "little"))
+		file.write(self.build_type.value.to_bytes(1, "little"))
