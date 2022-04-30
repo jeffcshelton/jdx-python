@@ -28,13 +28,7 @@ class Header:
 		label_bytes = int.from_bytes(file.read(4), "little")
 		image_count = int.from_bytes(file.read(8), "little")
 
-		labels = list(filter(
-			None, # Filters out empty strings because they are falsy
-			map(
-				lambda label: label.decode("utf-8"),
-				file.read(label_bytes).split(b'\0')
-			)
-		))
+		labels = [label.decode("utf-8") for label in file.read(label_bytes).split(b'\0') if label]
 
 		return Header(version, image_width, image_height, bit_depth, image_count, labels)
 
