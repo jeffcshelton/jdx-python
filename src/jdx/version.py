@@ -30,3 +30,4 @@ class Version:
 		file.write(self.minor.to_bytes(1, "little"))
 		file.write(self.patch.to_bytes(1, "little"))
 		file.write(self.build_type.value.to_bytes(1, "little"))
+		file.flush()

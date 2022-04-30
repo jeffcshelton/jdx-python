@@ -33,3 +33,4 @@ class Dataset:
 
 		file.write(len(compressed_body).to_bytes(8, "little"))
 		file.write(compressed_body)
+		file.flush()
