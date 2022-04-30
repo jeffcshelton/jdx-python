@@ -1,5 +1,6 @@
+from __future__ import annotations
 from io import BufferedReader
-from version import Version
+from .version import Version
 from typing import List
 
 class Header:
@@ -12,11 +13,11 @@ class Header:
 		self.labels = labels
 
 	@staticmethod
-	def read_from_path(path: str):
+	def read_from_path(path: str) -> Header:
 		return Header.read_from_file(open(path, "rb"))
 
 	@staticmethod
-	def read_from_file(file: BufferedReader):
+	def read_from_file(file: BufferedReader) -> Header:
 		if file.read(3) != "JDX": # Corruption check
 			raise IOError
 		
