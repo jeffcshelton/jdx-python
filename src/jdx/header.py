@@ -18,7 +18,7 @@ class Header:
 
 	@staticmethod
 	def read_from_file(file: BufferedReader) -> Header:
-		if file.read(3) != "JDX": # Corruption check
+		if file.read(3) != b"JDX": # Corruption check
 			raise IOError
 		
 		version = Version.read_from_file(file)
