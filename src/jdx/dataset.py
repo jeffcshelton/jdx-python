@@ -1,10 +1,10 @@
 from __future__ import annotations
+
+from .image import Image, _LABEL_BYTES
 from io import BufferedReader
 from .header import Header
 import numpy as np
 import zlib
-
-_LABEL_BYTES = 2
 
 class Dataset:
 	def __init__(self, header: Header, raw_data: bytes):
@@ -13,6 +13,9 @@ class Dataset:
 
 		self.header = header
 		self._raw_data = np.frombuffer(raw_data, dtype=np.uint8)
+
+	def __iter__(self) -> DatasetIterator:
+		return DatasetIterator(self)
 
 	@staticmethod
 	def read_from_path(path: str) -> Dataset:
@@ -39,3 +42,21 @@ class Dataset:
 		file.write(len(compressed_body).to_bytes(8, "little"))
 		file.write(compressed_body)
 		file.flush()
+
+class DatasetIterator:
+	def __init__(self, dataset: Dataset):
+		self._raw_data = dataset._raw_data
+		self._labels = dataset.header.labels
+		self._step_size = dataset.header.image_size() + _LABEL_BYTES
+		self._offset = 0
+
+	def __next__(self) -> Image:
+		start_block = self._offset
+		end_block = start_block + self._step_size
+
+		if end_block >= len(self._raw_data):
+			raise StopIteration
+
+		self._offset = end_block
+
+		return Image(self._raw_data[start_block:end_block], self._labels)
