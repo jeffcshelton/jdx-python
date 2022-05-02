@@ -20,6 +20,20 @@ class Version:
 		self.patch = patch
 		self.build_type = build_type
 
+	def __repr__(self) -> str:
+		return f"Version {{ major: {self.major}, minor: {self.minor}, patch: {self.patch}, build_type: {self.build_type} }}"
+
+	def __str__(self) -> str:
+		build_str = [
+			" (dev build)",
+			"-alpha",
+			"-beta",
+			"-rc",
+			""
+		][self.build_type.value]
+
+		return f"v{self.major}.{self.minor}.{self.patch}{build_str}"
+
 	@staticmethod
 	def read_from_file(file: BufferedReader) -> Version:
 		return Version(
