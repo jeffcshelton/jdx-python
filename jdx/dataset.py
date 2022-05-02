@@ -10,7 +10,7 @@ class Dataset:
 	def __eq__(self, other: Dataset) -> bool:
 		return (
 			self.header == other.header
-			and self._raw_data == other._raw_data
+			and np.array_equal(self._raw_data, other._raw_data)
 		)
 
 	def __init__(self, header: Header, raw_data: bytes):
