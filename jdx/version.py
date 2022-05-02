@@ -14,6 +14,14 @@ class Version:
 	def current() -> Version:
 		return Version(0, 4, 0, BuildType.DEV)
 
+	def __eq__(self, other: Version) -> bool:
+		return (
+			self.major == other.major
+			and self.minor == other.minor
+			and self.patch == other.patch
+			and self.build_type == other.build_type
+		)
+
 	def __init__(self, major: int, minor: int, patch: int, build_type: BuildType):
 		self.major = major
 		self.minor = minor
