@@ -11,6 +11,16 @@ class Header:
 			* self.bit_depth // 8
 		)
 
+	def __eq__(self, other: Header) -> bool:
+		return (
+			self.version == other.version
+			and self.image_width == other.image_width
+			and self.image_height == other.image_height
+			and self.bit_depth == other.bit_depth
+			and self.image_count == other.image_count
+			and self.labels == other.labels
+		)
+
 	def __init__(self, version: Version, image_width: int, image_height: int, bit_depth: int, image_count: int, labels: List[str]):
 		self.version = version
 		self.image_width = image_width

@@ -7,6 +7,12 @@ import numpy as np
 import zlib
 
 class Dataset:
+	def __eq__(self, other: Dataset) -> bool:
+		return (
+			self.header == other.header
+			and self._raw_data == other._raw_data
+		)
+
 	def __init__(self, header: Header, raw_data: bytes):
 		if len(raw_data) % (header.image_size() + _LABEL_BYTES) != 0:
 			raise ValueError
@@ -39,7 +45,7 @@ class Dataset:
 	def write_to_file(self, file: BufferedReader):
 		self.header.write_to_file(file)
 
-		compressed_body = zlib.compress(self.raw_data, 9)[2:-4]
+		compressed_body = zlib.compress(self._raw_data, 9)[2:-4]
 
 		file.write(len(compressed_body).to_bytes(8, "little"))
 		file.write(compressed_body)
