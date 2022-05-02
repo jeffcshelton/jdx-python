@@ -10,6 +10,10 @@ class BuildType(IntEnum):
 	RELEASE = 4
 
 class Version:
+	@staticmethod
+	def current() -> Version:
+		return Version(0, 4, 0, BuildType.DEV)
+
 	def __init__(self, major: int, minor: int, patch: int, build_type: BuildType):
 		self.major = major
 		self.minor = minor
