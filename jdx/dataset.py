@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from io import BufferedReader, BufferedWriter
 from .image import Image, _LABEL_BYTES
-from io import BufferedReader
 from .header import Header
+from typing import Union
 import numpy as np
 import zlib
 
@@ -24,32 +25,43 @@ class Dataset:
 		return DatasetIterator(self)
 
 	@staticmethod
-	def read_from_path(path: str | BufferedReader) -> Dataset:
-		with open(path, "rb") as file:
-			return Dataset.read_from_file(file)
+	def read_from(input: Union[str, BufferedReader]) -> Dataset:
+		if type(input) == str:
+			file = open(input, "rb")
+		elif isinstance(input, BufferedReader):
+			file = input
+		else:
+			raise TypeError
 
-	@staticmethod
-	def read_from_file(file: BufferedReader) -> Dataset:
-		header = Header.read_from_file(file)
+		header = Header.read_from(file)
 		body_size = int.from_bytes(file.read(8), "little")
 
 		compressed_body = file.read(body_size)
 		decompressed_body = zlib.decompress(compressed_body, wbits=-15) # wbits parameter allows it to not have a zlib header & trailer
-		
+
+		if type(input) == str:
+			file.close()
+
 		return Dataset(header, decompressed_body)
+		
+	def write_to(self, output: Union[str, BufferedWriter]):
+		if type(output) == str:
+			file = open(output, "wb")
+		elif isinstance(output, BufferedWriter):
+			file = output
+		else:
+			raise TypeError
 
-	def write_to_path(self, path: str):
-		with open(path, "wb") as file:
-			self.write_to_file(file)
-
-	def write_to_file(self, file: BufferedReader):
-		self.header.write_to_file(file)
+		self.header.write_to(file)
 
 		compressed_body = zlib.compress(self._raw_data, 9)[2:-4]
-
 		file.write(len(compressed_body).to_bytes(8, "little"))
 		file.write(compressed_body)
-		file.flush()
+
+		if type(output) == str:
+			file.close()
+		else:
+			file.flush()
 
 class DatasetIterator:
 	def __init__(self, dataset: Dataset):

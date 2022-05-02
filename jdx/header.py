@@ -1,7 +1,8 @@
 from __future__ import annotations
-from io import BufferedReader
+
+from io import BufferedReader, BufferedWriter
+from typing import Sequence, Union
 from .version import Version
-from typing import List
 
 class Header:
 	def image_size(self) -> int:
@@ -21,21 +22,23 @@ class Header:
 			and self.labels == other.labels
 		)
 
-	def __init__(self, version: Version, image_width: int, image_height: int, bit_depth: int, image_count: int, labels: List[str]):
+	def __init__(self, version: Version, image_width: int, image_height: int, bit_depth: int, image_count: int, labels: Sequence[str]):
 		self.version = version
 		self.image_width = image_width
 		self.image_height = image_height
 		self.bit_depth = bit_depth
 		self.image_count = image_count
-		self.labels = labels
+		self.labels = list(labels)
 
 	@staticmethod
-	def read_from_path(path: str) -> Header:
-		with open(path, "rb") as file:
-			return Header.read_from_file(file)
+	def read_from(input: Union[str, BufferedReader]) -> Header:
+		if type(input) == str:
+			file = open(input, "rb")
+		elif isinstance(input, BufferedReader):
+			file = input
+		else:
+			raise TypeError
 
-	@staticmethod
-	def read_from_file(file: BufferedReader) -> Header:
 		if file.read(3) != b"JDX": # Corruption check
 			raise IOError
 		
@@ -48,9 +51,19 @@ class Header:
 
 		labels = [label.decode("utf-8") for label in file.read(label_bytes).split(b'\0') if label]
 
+		if type(input) == str:
+			file.close()
+
 		return Header(version, image_width, image_height, bit_depth, image_count, labels)
 
-	def write_to_file(self, file: BufferedReader):
+	def write_to(self, output: Union[str, BufferedWriter]):
+		if type(output) == str:
+			file = open(output, "wb")
+		elif isinstance(output, BufferedWriter):
+			file = output
+		else:
+			raise TypeError
+
 		file.write(b"JDX")
 		self.version.write_to_file(file)
 
@@ -63,4 +76,8 @@ class Header:
 		file.write(len(raw_labels).to_bytes(4, "little"))
 		file.write(self.image_count.to_bytes(8, "little"))
 		file.write(raw_labels)
-		file.flush()
+
+		if type(output) == str:
+			file.close()
+		else:
+			file.flush()
