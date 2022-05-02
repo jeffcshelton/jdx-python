@@ -4,6 +4,13 @@ from .version import Version
 from typing import List
 
 class Header:
+	def image_size(self) -> int:
+		return (
+			self.image_width
+			* self.image_height
+			* self.bit_depth // 8
+		)
+
 	def __init__(self, version: Version, image_width: int, image_height: int, bit_depth: int, image_count: int, labels: List[str]):
 		self.version = version
 		self.image_width = image_width
