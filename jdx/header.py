@@ -21,7 +21,8 @@ class Header:
 
 	@staticmethod
 	def read_from_path(path: str) -> Header:
-		return Header.read_from_file(open(path, "rb"))
+		with open(path, "rb") as file:
+			return Header.read_from_file(file)
 
 	@staticmethod
 	def read_from_file(file: BufferedReader) -> Header:

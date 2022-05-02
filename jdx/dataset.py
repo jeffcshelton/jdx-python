@@ -18,8 +18,9 @@ class Dataset:
 		return DatasetIterator(self)
 
 	@staticmethod
-	def read_from_path(path: str) -> Dataset:
-		return Dataset.read_from_file(open(path, "rb"))
+	def read_from_path(path: str | BufferedReader) -> Dataset:
+		with open(path, "rb") as file:
+			return Dataset.read_from_file(file)
 
 	@staticmethod
 	def read_from_file(file: BufferedReader) -> Dataset:
@@ -32,7 +33,8 @@ class Dataset:
 		return Dataset(header, decompressed_body)
 
 	def write_to_path(self, path: str):
-		self.write_to_file(open(path, "wb"))
+		with open(path, "wb") as file:
+			self.write_to_file(file)
 
 	def write_to_file(self, file: BufferedReader):
 		self.header.write_to_file(file)
