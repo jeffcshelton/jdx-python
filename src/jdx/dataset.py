@@ -1,13 +1,18 @@
 from __future__ import annotations
 from io import BufferedReader
 from .header import Header
+import numpy as np
 import zlib
 
+_LABEL_BYTES = 2
+
 class Dataset:
-	# TODO: Change to using Numpy
 	def __init__(self, header: Header, raw_data: bytes):
+		if len(raw_data) % (header.image_size() + _LABEL_BYTES) != 0:
+			raise ValueError
+
 		self.header = header
-		self.raw_data = raw_data
+		self._raw_data = np.frombuffer(raw_data, dtype=np.uint8)
 
 	@staticmethod
 	def read_from_path(path: str) -> Dataset:
