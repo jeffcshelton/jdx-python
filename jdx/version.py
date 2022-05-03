@@ -42,6 +42,15 @@ class Version:
 
 		return f"v{self.major}.{self.minor}.{self.patch}{build_str}"
 
+	def is_compatible_with(self, other: Version) -> bool:
+		if self.major == 0:
+			return (
+				self.major == other.major
+				and self.minor == other.minor
+			)
+		else:
+			return self.major == other.major
+
 	@staticmethod
 	def read_from_file(file: BufferedReader) -> Version:
 		return Version(
