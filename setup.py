@@ -1,32 +1,18 @@
-from setuptools import Extension, setup
-import os
+from setuptools import setup
 
-def main():
-	PROJ_DIR = os.path.dirname(os.path.abspath(__file__))
-	LIBJDX_DIR = os.path.join(PROJ_DIR, "libjdx")
-
-	os.system("git submodule update --init --recursive")
-	os.system(f"cd {LIBJDX_DIR} && make")
-
-	jdx = Extension(
-		"jdx",
-		sources=[
-			os.path.join(PROJ_DIR, "wrapper.c")
-		],
-		include_dirs=[os.path.join(LIBJDX_DIR, "include")],
-		extra_objects=[os.path.join(LIBJDX_DIR, "lib/libjdx.a")]
-	)
+if __name__ == "__main__":
+	with open("README.md") as file:
+		readme = file.read()
 
 	setup(
 		name="jdx",
-		version="0.3.0-alpha",
-		description="Python wrapper library for libjdx.",
-		author="Jeffrey C. Shelton",
-		author_email="jeffrey.shelton.dev@gmail.com",
+		version="0.4.0",
+		author="Jeffrey Shelton",
+		author_email="jeffrey.shelton.c@gmail.com",
+		description="Library for reading JDX files",
+		long_description=readme,
 		url="https://github.com/jeffreycshelton/jdx-python",
 		license="MIT",
-		ext_modules=[jdx]
+		packages=["jdx"],
+		install_requires=["numpy"]
 	)
-
-if __name__ == "__main__":
-	main()
