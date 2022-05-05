@@ -24,6 +24,9 @@ class Dataset:
 	def __iter__(self) -> DatasetIterator:
 		return DatasetIterator(self)
 
+	def get_label_str(self, index) -> str:
+		return self.header.labels[index]
+
 	@staticmethod
 	def read_from(input: Union[str, BufferedReader]) -> Dataset:
 		if type(input) == str:
