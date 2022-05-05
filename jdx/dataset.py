@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from io import BufferedReader, BufferedWriter
-from .image import Image, _LABEL_BYTES
+from typing import Tuple, Union
 from .header import Header
-from typing import Union
 import numpy as np
 import zlib
+
+_LABEL_BYTES = 2
 
 class Dataset:
 	def __eq__(self, other: Dataset) -> bool:
@@ -69,17 +70,22 @@ class Dataset:
 class DatasetIterator:
 	def __init__(self, dataset: Dataset):
 		self._raw_data = dataset._raw_data
-		self._labels = dataset.header.labels
-		self._step_size = dataset.header.image_size() + _LABEL_BYTES
 		self._offset = 0
 
-	def __next__(self) -> Image:
-		start_block = self._offset
-		end_block = start_block + self._step_size
+		self._image_shape = (dataset.header.image_height, dataset.header.image_width, dataset.header.bit_depth // 8)
+		self._image_size = dataset.header.image_size()
 
-		if end_block >= len(self._raw_data):
+	def __next__(self) -> Tuple[np.ndarray, int]:
+		start_block = self._offset
+		end_image = start_block + self._image_size
+		end_label = end_image + _LABEL_BYTES
+
+		if end_label > len(self._raw_data):
 			raise StopIteration
 
-		self._offset = end_block
+		self._offset = end_label
 
-		return Image(self._raw_data[start_block:end_block], self._labels)
+		return (
+			np.reshape(self._raw_data[start_block:end_image], self._image_shape),
+			int.from_bytes(self._raw_data[end_image:end_label], "little")
+		)
