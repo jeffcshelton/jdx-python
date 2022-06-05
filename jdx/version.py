@@ -12,7 +12,7 @@ class BuildType(IntEnum):
 class Version:
 	@staticmethod
 	def current() -> Version:
-		return Version(0, 4, 0, BuildType.DEV)
+		return Version(0, 4, 0, BuildType.RELEASE)
 
 	def __eq__(self, other: Version) -> bool:
 		return (
