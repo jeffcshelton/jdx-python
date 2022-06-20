@@ -42,7 +42,7 @@ class Header:
 		if file.read(3) != b"JDX": # Corruption check
 			raise IOError
 		
-		version = Version.read_from_file(file)
+		version = Version._read_from_file(file)
 		image_width = int.from_bytes(file.read(2), "little")
 		image_height = int.from_bytes(file.read(2), "little")
 		bit_depth = int.from_bytes(file.read(1), "little")
@@ -65,7 +65,7 @@ class Header:
 			raise TypeError
 
 		file.write(b"JDX")
-		self.version.write_to_file(file)
+		self.version._write_to_file(file)
 
 		file.write(self.image_width.to_bytes(2, "little"))
 		file.write(self.image_height.to_bytes(2, "little"))
