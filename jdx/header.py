@@ -19,16 +19,16 @@ class Header:
 			and self.image_height == other.image_height
 			and self.bit_depth == other.bit_depth
 			and self.image_count == other.image_count
-			and self.labels == other.labels
+			and self.classes == other.classes
 		)
 
-	def __init__(self, version: Version, image_width: int, image_height: int, bit_depth: int, image_count: int, labels: Sequence[str]):
+	def __init__(self, version: Version, image_width: int, image_height: int, bit_depth: int, image_count: int, classes: Sequence[str]):
 		self.version = version
 		self.image_width = image_width
 		self.image_height = image_height
 		self.bit_depth = bit_depth
 		self.image_count = image_count
-		self.labels = list(labels)
+		self.classes = list(classes)
 
 	@staticmethod
 	def read_from(input: Union[str, BufferedReader]) -> Header:
@@ -49,12 +49,12 @@ class Header:
 		label_bytes = int.from_bytes(file.read(4), "little")
 		image_count = int.from_bytes(file.read(8), "little")
 
-		labels = [label.decode("utf-8") for label in file.read(label_bytes).split(b'\0') if label]
+		classes = [class_name.decode("utf-8") for class_name in file.read(label_bytes).split(b'\0') if class_name]
 
 		if type(input) == str:
 			file.close()
 
-		return Header(version, image_width, image_height, bit_depth, image_count, labels)
+		return Header(version, image_width, image_height, bit_depth, image_count, classes)
 
 	def write_to(self, output: Union[str, BufferedWriter]):
 		if type(output) == str:
@@ -71,11 +71,11 @@ class Header:
 		file.write(self.image_height.to_bytes(2, "little"))
 		file.write(self.bit_depth.to_bytes(1, "little"))
 
-		raw_labels = b"".join([label.encode("utf-8") + b"\0" for label in self.labels])
+		raw_classes = b"".join([class_name.encode("utf-8") + b"\0" for class_name in self.classes])
 		
-		file.write(len(raw_labels).to_bytes(4, "little"))
+		file.write(len(raw_classes).to_bytes(4, "little"))
 		file.write(self.image_count.to_bytes(8, "little"))
-		file.write(raw_labels)
+		file.write(raw_classes)
 
 		if type(output) == str:
 			file.close()
