@@ -10,7 +10,36 @@ jdx-python is not yet listed on [PyPi](pypi.org), so it can't be directly instal
 
 ## Examples
 
-***Coming Soon***
+```python
+from jdx import Dataset
+
+dset = Dataset.read_from("path/to/file.jdx")
+
+# Get width, height, and bit depth of the images
+# NOTE: These values are guaranteed to be the same across all images in the dataset
+width = dset.header.image_width
+height = dset.header.image_height
+bit_depth = dset.header.bit_depth
+
+# Each possible value of 'header.bit_depth' corresponds to the number of bits in each pixel:
+# - 8 bits => 1 byte per pixel (luma)
+# - 24 bits => 3 bytes per pixel (red, green, blue)
+# - 32 bits => 4 bytes per pixel (red, green, blue, alpha)
+
+for (image, label) in dset:
+	# Each image is NumPy array consisting of its raw pixel data in the shape (width, height, bytes-per-pixel)
+	# NOTE: For color images, data is stored in either RGB or RGBA format. OpenCV uses BGR format, so a 'cv.cvtColor' call is required to convert it for use with OpenCV.
+
+	# Individual pixels can be accessed using normal indexing of a 3D NumPy array:
+	px = image[y, x]
+
+	# Labels are int values which correspond to a class in the 'classes' field of the header
+	# The label can be used to get the class name as a string:
+	class_name = dset.get_class(label)
+
+# Additionally, a dataset can be indexed using the Dataset.get method
+(third_image, third_label) = dset.get(2)
+```
 
 ## Development
 
