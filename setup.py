@@ -6,7 +6,7 @@ if __name__ == "__main__":
 
 	setup(
 		name="jdx",
-		version="0.4.0",
+		version="0.5.0",
 		author="Jeffrey Shelton",
 		author_email="jeffrey.shelton.c@gmail.com",
 		description="Library for reading JDX files",
