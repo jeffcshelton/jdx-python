@@ -1,6 +1,6 @@
 # JDX Python
 
-jdx-python is a Python wrapper around libjdx, the low-level C library that manages JDX files directly. It can be used in Python projects (particularly those involving machine learning) to simplify your storage of classified images alongside using the [JDX Command Line Tool](https://github.com/jeffreycshelton/jdx-clt) to create and manage JDX files from the terminal.
+jdx-python is a Python library (now written purely in Python) for interacting with JDX files, making it easier to read and train machine learning models on large datasets of classified images. It can be used in Python projects to simplify your storage of categorized images alongside using the [JDX Command Line Tool](https://github.com/jeffreycshelton/jdx-clt) to create and manage JDX files from the terminal.
 
 ## Usage
 
@@ -47,4 +47,4 @@ jdx-python and the rest of the [JDX Project](https://github.com/jeffreycshelton/
 
 ## License
 
-The JDX Python wrapper is licensed under the [MIT License](LICENSE).
+The JDX Python library is licensed under the [MIT License](LICENSE).
